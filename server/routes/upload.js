@@ -3,6 +3,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const { PDFParse } = require("pdf-parse");
+const { transcribeAudio, summarizeText } = require("../services/ai");
 
 const router = express.Router();
 
@@ -26,6 +27,17 @@ const upload = multer({
   },
 });
 
+async function extractPdfText(filePath) {
+  const bytes = new Uint8Array(fs.readFileSync(filePath));
+  const parser = new PDFParse({ data: bytes });
+  try {
+    const result = await parser.getText();
+    return { text: result.text || "", pages: result.total };
+  } finally {
+    await parser.destroy();
+  }
+}
+
 router.post("/", upload.single("file"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded" });
@@ -34,37 +46,41 @@ router.post("/", upload.single("file"), async (req, res) => {
   const ext = path.extname(req.file.originalname).toLowerCase();
 
   try {
-    if (ext === ".pdf") {
-      const bytes = new Uint8Array(fs.readFileSync(req.file.path));
-      const parser = new PDFParse({ data: bytes });
-      const result = await parser.getText();
-      await parser.destroy();
-      fs.unlink(req.file.path, () => {});
+    let text;
+    let pages;
 
-      const text = result.text || "";
+    if (ext === ".pdf") {
+      const pdf = await extractPdfText(req.file.path);
+      text = pdf.text;
+      pages = pdf.pages;
       if (text.trim().length < 50) {
         return res.status(422).json({
           error: "This PDF has no readable text. It may be scanned images.",
         });
       }
-
-      return res.json({
-        type: "pdf",
-        filename: req.file.filename,
-        pages: result.total,
-        characters: text.length,
-        preview: text.slice(0, 300),
-      });
+    } else {
+      text = await transcribeAudio(req.file.path);
+      if (!text || text.trim().length < 20) {
+        return res.status(422).json({ error: "No clear speech was found in this audio." });
+      }
     }
 
+    const notes = await summarizeText(text);
+
     res.json({
-      type: "audio",
-      filename: req.file.filename,
-      sizeKB: Math.round(req.file.size / 1024),
+      type: ext === ".pdf" ? "pdf" : "audio",
+      filename: req.file.originalname,
+      pages,
+      characters: text.length,
+      ...notes,
     });
   } catch (err) {
     console.error("Upload error:", err);
-    res.status(500).json({ error: "Could not read the file: " + err.message });
+    const message =
+      process.env.NODE_ENV === "production" ? "Could not process the file" : err.message;
+    res.status(500).json({ error: message });
+  } finally {
+    fs.unlink(req.file.path, () => {});
   }
 });
 

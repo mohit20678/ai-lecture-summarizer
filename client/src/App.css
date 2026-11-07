@@ -1,0 +1,12 @@
+.app { max-width: 720px; margin: 0 auto; padding: 3rem 1.25rem; }
+header h1 { font-size: 2.2rem; margin: 0 0 .4rem; background: linear-gradient(90deg, #7c83ff, #35d0ba); -webkit-background-clip: text; background-clip: text; color: transparent; }
+header p { color: #8b949e; margin: 0 0 2rem; }
+.upload { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; background: #161b22; border: 1px dashed #30363d; border-radius: 14px; padding: 1.4rem; }
+.upload input { flex: 1 1 14rem; color: #8b949e; }
+.upload button { background: #7c83ff; color: #0d1117; border: 0; border-radius: 8px; padding: .65rem 1.3rem; font-weight: 700; cursor: pointer; }
+.upload button:disabled { opacity: .5; cursor: not-allowed; }
+.upload small { flex-basis: 100%; color: #8b949e; }
+.error { color: #ff7b72; margin-top: 1rem; }
+.result { margin-top: 1.5rem; background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 1.6rem; }
+.result h2 { margin-top: 0; }
+.result h3 { color: #35d0ba; margin-bottom: .3rem; }

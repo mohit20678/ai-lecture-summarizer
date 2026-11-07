@@ -4,6 +4,8 @@ const path = require("path");
 const fs = require("fs");
 const { PDFParse } = require("pdf-parse");
 const { transcribeAudio, summarizeText } = require("../services/ai");
+const mongoose = require("mongoose");
+const Note = require("../models/Note");
 
 const router = express.Router();
 
@@ -67,13 +69,20 @@ router.post("/", upload.single("file"), async (req, res) => {
 
     const notes = await summarizeText(text);
 
-    res.json({
+    const result = {
       type: ext === ".pdf" ? "pdf" : "audio",
       filename: req.file.originalname,
       pages,
       characters: text.length,
       ...notes,
-    });
+    };
+
+    if (mongoose.connection.readyState === 1) {
+      const saved = await Note.create(result);
+      result.id = saved._id;
+    }
+
+    res.json(result);
   } catch (err) {
     console.error("Upload error:", err);
     const message =

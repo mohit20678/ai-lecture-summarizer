@@ -1,0 +1,17 @@
+.sidebar { width: 280px; flex-shrink: 0; background: #010409; border-right: 1px solid #21262d; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: .6rem; }
+.sidebar h2 { font-size: .8rem; color: #8b949e; text-transform: uppercase; letter-spacing: .06em; margin: 1rem 0 .2rem; }
+.sidebar .new { background: #161b22; color: #e6edf3; border: 1px solid #30363d; border-radius: 10px; padding: .7rem 1rem; text-align: left; cursor: pointer; font-weight: 600; }
+.sidebar .new:hover { border-color: #7c83ff; }
+.sidebar ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .15rem; }
+.sidebar li { display: flex; align-items: center; border-radius: 8px; }
+.sidebar li:hover, .sidebar li.active { background: #161b22; }
+.sidebar .item { flex: 1; min-width: 0; background: none; border: 0; color: #e6edf3; text-align: left; padding: .6rem .7rem; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .92rem; }
+.sidebar .del { background: none; border: 0; color: #8b949e; cursor: pointer; padding: .4rem .6rem; opacity: 0; }
+.sidebar li:hover .del, .sidebar li.active .del { opacity: 1; }
+.sidebar .del:hover { color: #ff7b72; }
+.sidebar .empty, .sidebar .side-error { color: #8b949e; font-size: .88rem; padding: 0 .3rem; }
+.sidebar .side-error { color: #ff7b72; }
+@media (max-width: 760px) {
+  .sidebar { position: fixed; z-index: 20; top: 0; bottom: 0; left: 0; transform: translateX(-100%); transition: transform .2s; }
+  .sidebar.open { transform: none; }
+}

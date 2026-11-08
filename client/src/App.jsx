@@ -12,7 +12,9 @@ export default function App() {
   const [error, setError] = useState("");
   const [lectures, setLectures] = useState([]);
   const [listError, setListError] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => window.innerWidth < 760);
+  const [width, setWidth] = useState(300);
+  const [dragging, setDragging] = useState(false);
 
   async function loadLectures() {
     try {
@@ -29,6 +31,21 @@ export default function App() {
   useEffect(() => {
     loadLectures();
   }, []);
+
+  function startDrag(e) {
+    e.preventDefault();
+    setDragging(true);
+    document.body.style.userSelect = "none";
+    const move = (ev) => setWidth(Math.min(520, Math.max(220, ev.clientX)));
+    const up = () => {
+      setDragging(false);
+      document.body.style.userSelect = "";
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  }
 
   async function handleUpload(file) {
     setStatus("loading");
@@ -51,7 +68,7 @@ export default function App() {
 
   async function openLecture(id) {
     setError("");
-    setSidebarOpen(false);
+    if (window.innerWidth < 760) setCollapsed(true);
     try {
       const res = await fetch(`${API}/api/notes/${id}`);
       const data = await res.json();
@@ -83,23 +100,29 @@ export default function App() {
     setResult(null);
     setError("");
     setStatus("idle");
-    setSidebarOpen(false);
+    if (window.innerWidth < 760) setCollapsed(true);
   }
 
   return (
     <div className="shell">
-      <LectureList
-        open={sidebarOpen}
-        items={lectures}
-        error={listError}
-        activeId={result ? result._id || result.id : null}
-        onOpen={openLecture}
-        onDelete={deleteLecture}
-        onNew={newLecture}
-      />
+      <div
+        className={`side-wrap ${dragging ? "dragging" : ""} ${collapsed ? "collapsed" : ""}`}
+        style={{ width: collapsed ? 0 : width }}
+      >
+        <LectureList
+          width={width}
+          items={lectures}
+          error={listError}
+          activeId={result ? result._id || result.id : null}
+          onOpen={openLecture}
+          onDelete={deleteLecture}
+          onNew={newLecture}
+        />
+        <div className="resizer" onPointerDown={startDrag} title="Drag to resize" />
+      </div>
       <div className="main">
         <div className="topbar">
-          <button onClick={() => setSidebarOpen((o) => !o)} aria-label="Menu">☰</button>
+          <button onClick={() => setCollapsed((c) => !c)} aria-label="Toggle sidebar">☰</button>
         </div>
         <div className="content">
           <header>

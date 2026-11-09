@@ -3,6 +3,7 @@ import UploadBox from "./components/UploadBox";
 import ResultCard from "./components/ResultCard";
 import LectureList from "./components/LectureList";
 import "./App.css";
+import "./print.css";
 
 const API = "http://localhost:5000";
 

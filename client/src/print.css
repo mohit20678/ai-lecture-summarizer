@@ -1,0 +1,45 @@
+@page {
+  size: A4;
+  margin: 16mm 14mm 18mm;
+  @bottom-left { content: "AI Lecture Summarizer"; font-size: 8pt; color: #8b95a5; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8pt; color: #8b95a5; }
+}
+@media print {
+  :root { color-scheme: light !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html, body, #root, .shell { height: auto !important; overflow: visible !important; display: block !important; background: #fff !important; }
+  .main { overflow: visible !important; }
+  .side-wrap, .topbar, .content > header, .upload, .error, .export-bar { display: none !important; }
+  .content { max-width: none !important; padding: 0 !important; margin: 0 !important; }
+  body { font-family: "Segoe UI", Inter, system-ui, -apple-system, Arial, sans-serif; color: #1f2937; font-size: 10.5pt; line-height: 1.6; }
+
+  .result { background: #fff !important; border: 0 !important; padding: 0 !important; margin: 0 !important; color: #1f2937; font-size: 10.5pt !important; }
+  .result > h2 { background: linear-gradient(120deg, #5b63f0, #1fb5a0) !important; color: #fff !important; padding: 18pt 20pt; border-radius: 12pt; font-size: 21pt !important; line-height: 1.2; margin: 0 0 12pt !important; }
+  .result .overview { background: #f4f6ff !important; border-left: 4pt solid #5b63f0 !important; padding: 10pt 14pt !important; border-radius: 0 8pt 8pt 0; color: #2d3748 !important; font-size: 11pt; }
+
+  .result .topic { border-top: 0 !important; margin-top: 18pt !important; padding: 0 !important; break-inside: avoid-page; page-break-inside: avoid; }
+  .result .topic h3 { color: #111827 !important; font-size: 14pt !important; border-bottom: 1.5pt solid #e3e7ff; padding-bottom: 5pt; margin: 0 0 8pt !important; break-after: avoid; }
+  .result .idx { background: linear-gradient(135deg, #5b63f0, #1fb5a0) !important; color: #fff !important; }
+  .result p { orphans: 3; widows: 3; margin: 0 0 6pt; }
+  .result li { margin-bottom: 2pt; }
+  .result li::marker { color: #5b63f0; }
+
+  .result .example { background: #effaf8 !important; border: 1px solid #cdeee9 !important; border-left: 3pt solid #1fb5a0 !important; border-radius: 8pt; }
+  .result .example strong { color: #0f766e !important; }
+
+  .visual { background: #f7f8ff !important; border: 1px solid #dfe3ff !important; border-radius: 10pt; padding: 10pt 12pt !important; margin: 10pt 0 !important; }
+  .visual figcaption { color: #5b63f0 !important; font-weight: 600; }
+  .flow .step { background: #fff !important; border: 1px solid #5b63f0 !important; }
+  .flow .num, .concept .center { background: #5b63f0 !important; color: #fff !important; }
+  .concept .branch { background: #fff !important; border: 1px solid #1fb5a0 !important; }
+  .visual th { background: #eef0ff !important; color: #1f2937 !important; }
+  .visual th, .visual td { border: 1px solid #e2e6f3 !important; }
+  .visual tbody tr:nth-child(even) td { background: #fafbff !important; }
+
+  .glossary { grid-template-columns: 1fr 1fr !important; }
+  .glossary div { background: #f7f8ff !important; border: 1px solid #dfe3ff !important; }
+  .glossary dt { color: #4338ca !important; }
+  .glossary dd { color: #374151 !important; }
+
+  .visual, .example, .glossary div, .flow .step, tr { break-inside: avoid; }
+}

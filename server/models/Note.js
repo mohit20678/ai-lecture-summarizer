@@ -8,6 +8,8 @@ const noteSchema = new mongoose.Schema(
     characters: Number,
     title: String,
     summary: String,
+    topics: [mongoose.Schema.Types.Mixed],
+    glossary: [{ term: String, meaning: String }],
     keyPoints: [String],
     revisionQuestions: [String],
   },

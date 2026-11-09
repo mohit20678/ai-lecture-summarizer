@@ -86,7 +86,9 @@ router.post("/", upload.single("file"), async (req, res) => {
   } catch (err) {
     console.error("Upload error:", err);
     const message =
-      process.env.NODE_ENV === "production" ? "Could not process the file" : err.message;
+      err.status === 429
+        ? "The AI service is busy (rate limit reached). Please wait a few minutes and try again."
+        : process.env.NODE_ENV === "production" ? "Could not process the file" : err.message;
     res.status(500).json({ error: message });
   } finally {
     fs.unlink(req.file.path, () => {});

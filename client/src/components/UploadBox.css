@@ -1,0 +1,8 @@
+.upload.drag { border-color: #7c83ff; background: #1a2036; }
+.upload .drop { flex: 1 1 14rem; cursor: pointer; display: grid; gap: .2rem; padding: .4rem .2rem; min-width: 0; }
+.upload .drop strong { font-weight: 600; word-break: break-all; }
+.upload .msg { flex-basis: 100%; margin: 0; color: #ff7b72; }
+.upload .progress { flex-basis: 100%; display: grid; gap: .5rem; color: #8b949e; font-size: .9rem; }
+.upload .bar { height: 4px; border-radius: 99px; background: #21262d; overflow: hidden; position: relative; }
+.upload .bar::after { content: ""; position: absolute; top: 0; bottom: 0; left: -35%; width: 35%; background: linear-gradient(90deg, #7c83ff, #35d0ba); border-radius: 99px; animation: slide 1.2s ease-in-out infinite; }
+@keyframes slide { 0% { left: -35%; } 100% { left: 100%; } }

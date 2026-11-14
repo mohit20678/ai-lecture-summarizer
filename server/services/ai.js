@@ -19,7 +19,7 @@ function getClient() {
   if (!key || key === "your_key_here") {
     throw new Error("OPENAI_API_KEY is missing in server/.env");
   }
-  return new OpenAI({ apiKey: key });
+  return new OpenAI({ apiKey: key, maxRetries: 0 });
 }
 
 async function transcribeAudio(filePath) {

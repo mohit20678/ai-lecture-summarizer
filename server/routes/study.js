@@ -16,7 +16,7 @@ function rateMessage(err) {
 function client() {
   const k = process.env.OPENAI_API_KEY;
   if (!k || k === "your_key_here") throw new Error("OPENAI_API_KEY is missing in server/.env");
-  return new OpenAI({ apiKey: k });
+  return new OpenAI({ apiKey: k, maxRetries: 0 });
 }
 
 function context(n) {

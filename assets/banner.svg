@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320" role="img" aria-label="AI Lecture Summarizer">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1117"/>
+      <stop offset="1" stop-color="#1a1f4d"/>
+    </linearGradient>
+    <linearGradient id="tx" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7c83ff"/>
+      <stop offset="1" stop-color="#35d0ba"/>
+    </linearGradient>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="40"/></filter>
+    <clipPath id="type"><rect x="250" y="0" width="0" height="320"><animate attributeName="width" from="0" to="700" begin="1.2s" dur="2.4s" fill="freeze"/></rect></clipPath>
+  </defs>
+  <rect width="1200" height="320" rx="18" fill="url(#bg)"/>
+  <g filter="url(#blur)" opacity="0.55">
+    <circle cx="200" cy="80" r="90" fill="#7c83ff">
+      <animate attributeName="cx" values="200;420;200" dur="9s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="80;220;80" dur="7s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="980" cy="240" r="100" fill="#35d0ba">
+      <animate attributeName="cx" values="980;760;980" dur="10s" repeatCount="indefinite"/>
+      <animate attributeName="cy" values="240;90;240" dur="8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="600" cy="300" r="70" fill="#ef6f91">
+      <animate attributeName="cx" values="600;800;450;600" dur="12s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  <text x="600" y="140" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="62" font-weight="800" fill="url(#tx)" opacity="0">
+    <animate attributeName="opacity" from="0" to="1" dur="1.2s" fill="freeze"/>
+    AI Lecture Summarizer
+  </text>
+  <g clip-path="url(#type)">
+    <text x="600" y="200" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="24" fill="#c9d1d9">Turn lectures into notes, flashcards, quizzes and chat</text>
+  </g>
+  <rect x="250" y="178" width="3" height="30" fill="#35d0ba">
+    <animate attributeName="x" from="250" to="950" begin="1.2s" dur="2.4s" fill="freeze"/>
+    <animate attributeName="opacity" values="1;0;1" dur="0.8s" repeatCount="indefinite"/>
+  </rect>
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#e6edf3" text-anchor="middle">
+    <g opacity="0"><animate attributeName="opacity" from="0" to="1" begin="3.8s" dur="0.6s" fill="freeze"/>
+      <rect x="235" y="242" width="130" height="36" rx="18" fill="#ffffff" fill-opacity="0.08" stroke="#7c83ff" stroke-opacity="0.7"/><text x="300" y="265">Detailed notes</text></g>
+    <g opacity="0"><animate attributeName="opacity" from="0" to="1" begin="4.1s" dur="0.6s" fill="freeze"/>
+      <rect x="385" y="242" width="130" height="36" rx="18" fill="#ffffff" fill-opacity="0.08" stroke="#7c83ff" stroke-opacity="0.7"/><text x="450" y="265">Flashcards</text></g>
+    <g opacity="0"><animate attributeName="opacity" from="0" to="1" begin="4.4s" dur="0.6s" fill="freeze"/>
+      <rect x="535" y="242" width="130" height="36" rx="18" fill="#ffffff" fill-opacity="0.08" stroke="#35d0ba" stroke-opacity="0.7"/><text x="600" y="265">Quizzes</text></g>
+    <g opacity="0"><animate attributeName="opacity" from="0" to="1" begin="4.7s" dur="0.6s" fill="freeze"/>
+      <rect x="685" y="242" width="130" height="36" rx="18" fill="#ffffff" fill-opacity="0.08" stroke="#35d0ba" stroke-opacity="0.7"/><text x="750" y="265">AI chat</text></g>
+    <g opacity="0"><animate attributeName="opacity" from="0" to="1" begin="5s" dur="0.6s" fill="freeze"/>
+      <rect x="835" y="242" width="130" height="36" rx="18" fill="#ffffff" fill-opacity="0.08" stroke="#ef6f91" stroke-opacity="0.7"/><text x="900" y="265">PDF export</text></g>
+  </g>
+</svg>

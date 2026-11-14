@@ -12,6 +12,8 @@ const noteSchema = new mongoose.Schema(
     glossary: [{ term: String, meaning: String }],
     keyPoints: [String],
     revisionQuestions: [String],
+    flashcards: [mongoose.Schema.Types.Mixed],
+    quiz: mongoose.Schema.Types.Mixed,
   },
   { timestamps: true }
 );

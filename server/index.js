@@ -16,6 +16,7 @@ app.get("/", (req, res) =>
 app.use("/api/health", require("./routes/health"));
 app.use("/api/upload", require("./routes/upload"));
 app.use("/api/notes", require("./routes/notes"));
+app.use("/api/study", require("./routes/study"));
 
 app.use((err, req, res, next) => {
   res.status(400).json({ error: err.message });

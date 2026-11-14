@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import UploadBox from "./components/UploadBox";
 import ResultCard from "./components/ResultCard";
 import LectureList from "./components/LectureList";
+import StudyTools from "./components/StudyTools";
 import "./App.css";
 import "./print.css";
 
@@ -133,6 +134,7 @@ export default function App() {
           <UploadBox onUpload={handleUpload} loading={status === "loading"} />
           {status === "error" && <p className="error">{error}</p>}
           {status === "done" && <ResultCard note={result} />}
+          {status === "done" && result && <StudyTools key={result._id || result.id} note={result} />}
         </div>
       </div>
     </div>

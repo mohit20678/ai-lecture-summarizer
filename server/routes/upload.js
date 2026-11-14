@@ -9,6 +9,14 @@ const Note = require("../models/Note");
 
 const router = express.Router();
 
+function rateMessage(err) {
+  const m = String((err && err.message) || "");
+  const kind = (m.match(/on ([a-z ]+\((?:TPM|RPM|RPD|TPD)\))/i) || [])[1];
+  const wait = (m.match(/try again in ([0-9a-z.]+)/i) || [])[1];
+  return "OpenAI rate limit reached" + (kind ? " (" + kind + ")" : "") + (wait ? ". Try again in " + wait + "." : ". Please wait a few minutes and try again.");
+}
+
+
 const storage = multer.diskStorage({
   destination: path.join(__dirname, "..", "uploads"),
   filename: (req, file, cb) => {
@@ -87,7 +95,7 @@ router.post("/", upload.single("file"), async (req, res) => {
     console.error("Upload error:", err);
     const message =
       err.status === 429
-        ? "The AI service is busy (rate limit reached). Please wait a few minutes and try again."
+        ? rateMessage(err)
         : process.env.NODE_ENV === "production" ? "Could not process the file" : err.message;
     res.status(500).json({ error: message });
   } finally {

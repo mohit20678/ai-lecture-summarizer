@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./StudyTools.css";
+import MindMap from "./MindMap";
 
 const API = "http://localhost:5000";
 
@@ -235,13 +236,14 @@ export default function StudyTools({ note }) {
   return (
     <section className="study">
       <div className="st-tabs">
-        {[["cards", "Flashcards"], ["quiz", "Quiz"], ["chat", "Chat"]].map(([k, l]) => (
+        {[["cards", "Flashcards"], ["quiz", "Quiz"], ["chat", "Chat"], ["map", "Mind map"]].map(([k, l]) => (
           <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{l}</button>
         ))}
       </div>
       {tab === "cards" && <Flashcards id={id} saved={note.flashcards} />}
       {tab === "quiz" && <Quiz id={id} saved={note.quiz} />}
       {tab === "chat" && <Chat id={id} />}
+      {tab === "map" && <MindMap note={note} />}
     </section>
   );
 }

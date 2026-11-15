@@ -1,0 +1,28 @@
+.topbar { display: flex; align-items: center; gap: .8rem; }
+.topnav { display: flex; gap: .3rem; flex-wrap: wrap; }
+.topnav button { border: 0; background: none; color: #8b949e; padding: .4rem .95rem; border-radius: 99px; font-size: .95rem; font-weight: 600; cursor: pointer; }
+.topnav button:hover { color: #e6edf3; }
+.topnav button.on { background: #1c2333; color: #e6edf3; }
+.page { padding-top: .5rem; }
+.page-title { font-size: 2rem; margin: 0 0 .4rem; background: linear-gradient(90deg, #7c83ff, #35d0ba); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.muted { color: #8b949e; margin: 0 0 1rem; }
+.sec { font-size: 1.15rem; margin: 2rem 0 .8rem; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.stat { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 1.1rem 1.2rem; display: grid; gap: .2rem; }
+.stat strong { font-size: 1.9rem; color: #e6edf3; }
+.stat span { color: #8b949e; font-size: .85rem; }
+.cta-card { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(124, 131, 255, .18), rgba(53, 208, 186, .12)); border: 1px solid #30363d; border-radius: 14px; padding: 1.3rem 1.5rem; }
+.cta-card h3 { margin: 0 0 .2rem; }
+.cta-card p { margin: 0; }
+.primary { background: #7c83ff; color: #0d1117; border: 0; border-radius: 10px; padding: .7rem 1.4rem; font-weight: 700; cursor: pointer; }
+.recent { list-style: none; padding: 0; margin: 0; display: grid; gap: .6rem; }
+.recent button { width: 100%; display: flex; justify-content: space-between; gap: 1rem; text-align: left; background: #161b22; border: 1px solid #30363d; color: #e6edf3; border-radius: 12px; padding: .85rem 1.1rem; cursor: pointer; }
+.recent button:hover { border-color: #7c83ff; }
+.r-sub { color: #8b949e; font-size: .85rem; white-space: nowrap; }
+.panel { background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 1.2rem 1.5rem; margin-top: 1.2rem; }
+.panel h3 { margin: 0 0 .6rem; }
+.panel ul { margin: 0; padding-left: 1.2rem; color: #c9d1d9; display: grid; gap: .35rem; }
+.danger-zone { border-color: rgba(255, 123, 114, .4); }
+.danger { background: transparent; color: #ff7b72; border: 1px solid #ff7b72; border-radius: 10px; padding: .6rem 1.2rem; font-weight: 700; cursor: pointer; }
+.danger:disabled { opacity: .4; cursor: not-allowed; }
+.danger:hover:not(:disabled) { background: rgba(255, 123, 114, .12); }

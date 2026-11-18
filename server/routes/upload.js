@@ -2,20 +2,14 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const mongoose = require("mongoose");
 const { PDFParse } = require("pdf-parse");
 const { transcribeAudio, summarizeText } = require("../services/ai");
-const mongoose = require("mongoose");
+const { describeAiError } = require("../services/aiError");
 const Note = require("../models/Note");
+const { authenticateToken } = require("../middleware/auth");
 
 const router = express.Router();
-
-function rateMessage(err) {
-  const m = String((err && err.message) || "");
-  const kind = (m.match(/on ([a-z ]+\((?:TPM|RPM|RPD|TPD)\))/i) || [])[1];
-  const wait = (m.match(/try again in ([0-9a-z.]+)/i) || [])[1];
-  return "OpenAI rate limit reached" + (kind ? " (" + kind + ")" : "") + (wait ? ". Try again in " + wait + "." : ". Please wait a few minutes and try again.");
-}
-
 
 const storage = multer.diskStorage({
   destination: path.join(__dirname, "..", "uploads"),
@@ -25,7 +19,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const allowed = [".mp3", ".wav", ".m4a", ".pdf"];
+const allowed = [".mp3", ".wav", ".m4a", ".webm", ".mp4", ".pdf"];
 
 const upload = multer({
   storage,
@@ -33,7 +27,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
     if (allowed.includes(ext)) cb(null, true);
-    else cb(new Error("Only mp3, wav, m4a and pdf files are allowed"));
+    else cb(new Error("Only pdf, mp3, wav, m4a, webm and mp4 files are allowed"));
   },
 });
 
@@ -48,59 +42,112 @@ async function extractPdfText(filePath) {
   }
 }
 
-router.post("/", upload.single("file"), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
-
-  const ext = path.extname(req.file.originalname).toLowerCase();
-
-  try {
-    let text;
-    let pages;
-
-    if (ext === ".pdf") {
-      const pdf = await extractPdfText(req.file.path);
-      text = pdf.text;
-      pages = pdf.pages;
-      if (text.trim().length < 50) {
-        return res.status(422).json({
-          error: "This PDF has no readable text. It may be scanned images.",
-        });
-      }
-    } else {
-      text = await transcribeAudio(req.file.path);
-      if (!text || text.trim().length < 20) {
-        return res.status(422).json({ error: "No clear speech was found in this audio." });
-      }
+router.post(
+  "/",
+  authenticateToken,
+  upload.single("file"),
+  async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const notes = await summarizeText(text);
-
-    const result = {
-      type: ext === ".pdf" ? "pdf" : "audio",
-      filename: req.file.originalname,
-      pages,
-      characters: text.length,
-      ...notes,
+    const user = req.user;
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const body = req.body || {};
+    const opts = {
+      length: ["short", "standard", "detailed"].includes(body.length)
+        ? body.length
+        : "standard",
+      simple: body.simple === "true",
+      language: String(body.language || "").replace(/[^\p{L} ]/gu, "").trim().slice(0, 30),
     };
 
-    if (mongoose.connection.readyState === 1) {
-      const saved = await Note.create(result);
-      result.id = saved._id;
-    }
+    try {
+      let text;
+      let pages;
 
-    res.json(result);
-  } catch (err) {
-    console.error("Upload error:", err);
-    const message =
-      err.status === 429
-        ? rateMessage(err)
-        : process.env.NODE_ENV === "production" ? "Could not process the file" : err.message;
-    res.status(500).json({ error: message });
-  } finally {
-    fs.unlink(req.file.path, () => {});
+      if (ext === ".pdf") {
+        let pdf;
+        try {
+          pdf = await extractPdfText(req.file.path);
+        } catch (err) {
+          console.error("PDF read error:", err.message);
+          return res.status(422).json({
+            error: "This PDF could not be read. It may be damaged, password-protected or not a real PDF.",
+          });
+        }
+        text = pdf.text;
+        pages = pdf.pages;
+        if (text.trim().length < 50) {
+          return res.status(422).json({
+            error: "This PDF has no readable text. It may be a scan of paper — try a text-based PDF.",
+          });
+        }
+      } else {
+        text = await transcribeAudio(req.file.path);
+        if (!text || text.trim().length < 20) {
+          return res.status(422).json({ error: "No clear speech was found in this audio." });
+        }
+      }
+
+      const notes = await summarizeText(text, opts);
+
+      const result = {
+        type: ext === ".pdf" ? "pdf" : "audio",
+        filename: req.file.originalname,
+        originalName: req.file.originalname,
+        userId: user._id,
+        pages,
+        characters: text.length,
+        ...notes,
+        user: user._id, // Associate with user
+      };
+
+      // Save to database with user association
+      let savedNote = null;
+      if (mongoose.connection.readyState === 1) {
+        try {
+          const saved = await Note.create({
+            ...result,
+            user: user._id,
+          });
+          savedNote = saved;
+          result.id = saved._id;
+          result.saved = true;
+        } catch (err) {
+          console.error("Could not save note:", err.message);
+          result.saved = false;
+          result.saveWarning =
+            "The summary is ready, but it could not be saved to your history. Check the database connection.";
+        }
+      } else {
+        result.saved = false;
+        result.saveWarning =
+          "The summary is ready, but the database is not connected, so it is not in your history.";
+      }
+
+      res.json(result);
+    } catch (err) {
+      console.error("Upload error:", err);
+      const friendly = describeAiError(err);
+      if (friendly) {
+        if (friendly.retryAfter) res.set("Retry-After", String(friendly.retryAfter));
+        return res.status(friendly.status).json({
+          error: friendly.message,
+          code: friendly.code,
+          retryAfter: friendly.retryAfter || 0,
+        });
+      }
+      res.status(500).json({
+        error:
+          process.env.NODE_ENV === "production"
+            ? "Could not process the file"
+            : err.message || "Could not process the file",
+      });
+    } finally {
+      fs.unlink(req.file.path, () => {});
+    }
   }
-});
+);
 
 module.exports = router;

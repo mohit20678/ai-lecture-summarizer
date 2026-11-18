@@ -42,7 +42,7 @@ const SearchIcon = () => (
   </Svg>
 );
 
-export default function LectureList({ items, error, activeId, width, onOpen, onDelete, onNew }) {
+export default function LectureList({ items, loading, error, activeId, width, onOpen, onDelete, onNew, onRetry }) {
   const [query, setQuery] = useState("");
 
   const groups = useMemo(() => {
@@ -79,43 +79,61 @@ export default function LectureList({ items, error, activeId, width, onOpen, onD
       </label>
 
       <div className="list">
-        {error && <p className="side-msg err">{error}</p>}
-        {!error && items.length === 0 && (
+        {loading && (
+          <div className="side-loading" aria-live="polite">
+            <span className="spinner" />
+            Loading your lectures...
+          </div>
+        )}
+
+        {!loading && error && (
+          <div className="side-err" role="alert">
+            <strong>History could not load</strong>
+            <p>{error}</p>
+            <button onClick={onRetry}>Retry</button>
+          </div>
+        )}
+
+        {!loading && !error && items.length === 0 && (
           <p className="side-msg">No saved lectures yet. Summarize one and it will appear here.</p>
         )}
-        {!error && items.length > 0 && groups.length === 0 && (
+        {!loading && !error && items.length > 0 && groups.length === 0 && (
           <p className="side-msg">No lectures match your search.</p>
         )}
 
-        {groups.map((g) => (
-          <section key={g.label}>
-            <h2>{g.label}</h2>
-            <ul>
-              {g.list.map((n) => (
-                <li key={n._id} className={n._id === activeId ? "active" : ""}>
-                  <button className="item" onClick={() => onOpen(n._id)} title={n.title || n.filename}>
-                    <span className={`ico ${n.type === "audio" ? "audio" : "pdf"}`}>
-                      {n.type === "audio" ? <MicIcon /> : <PdfIcon />}
-                    </span>
-                    <span className="txt">
-                      <span className="ttl">{n.title || n.filename}</span>
-                      <span className="sub">
-                        {n.type === "audio" ? "Audio" : "PDF"} ·{" "}
-                        {new Date(n.createdAt).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+        {!loading &&
+          !error &&
+          groups.map((g) => (
+            <section key={g.label}>
+              <h2>{g.label}</h2>
+              <ul>
+                {g.list.map((n) => (
+                  <li key={n._id} className={n._id === activeId ? "active" : ""}>
+                    <button className="item" onClick={() => onOpen(n._id)} title={n.title || n.filename}>
+                      <span className={`ico ${n.type === "audio" ? "audio" : "pdf"}`}>
+                        {n.type === "audio" ? <MicIcon /> : <PdfIcon />}
                       </span>
-                    </span>
-                  </button>
-                  <button className="del" aria-label="Delete lecture" title="Delete" onClick={() => onDelete(n._id)}>
-                    <TrashIcon />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
+                      <span className="txt">
+                        <span className="ttl">{n.title || n.filename}</span>
+                        <span className="sub">
+                          {n.type === "audio" ? "Audio" : "PDF"} ·{" "}
+                          {new Date(n.createdAt).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                        </span>
+                      </span>
+                    </button>
+                    <button className="del" aria-label="Delete lecture" title="Delete" onClick={() => onDelete(n._id)}>
+                      <TrashIcon />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
       </div>
 
-      <div className="foot">{items.length} saved {items.length === 1 ? "lecture" : "lectures"}</div>
+      {items.length > 0 && (
+        <div className="foot">{items.length} saved {items.length === 1 ? "lecture" : "lectures"}</div>
+      )}
     </aside>
   );
 }

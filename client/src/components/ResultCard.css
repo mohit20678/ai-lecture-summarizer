@@ -6,8 +6,8 @@
 .result .example { background: #0d1117; border: 1px solid #30363d; border-left: 3px solid #35d0ba; border-radius: 10px; padding: .8rem 1.1rem; margin-top: 1rem; }
 .result .example strong { color: #35d0ba; }
 .result .example p { margin: .3rem 0 0; }
-.visual { margin: 1.2rem 0; background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 1.1rem 1.2rem; }
-.visual figcaption { color: #8b949e; font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .9rem; }
+.result .visual { background: #0d1117; border: 1px solid #30363d; border-radius: 12px; padding: 1.1rem 1.2rem; }
+.result .visual figcaption { color: #8b949e; font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; margin-bottom: .9rem; }
 .flow { display: flex; flex-wrap: wrap; gap: 1.6rem; }
 .flow .step { position: relative; display: flex; align-items: center; gap: .6rem; background: #161b22; border: 1px solid #7c83ff; border-radius: 10px; padding: .6rem .9rem; }
 .flow .step:not(:last-child)::after { content: "\2192"; position: absolute; right: -1.2rem; top: 50%; transform: translateY(-50%); color: #7c83ff; font-weight: 700; }
@@ -24,8 +24,27 @@
 .glossary div { background: #0d1117; border: 1px solid #30363d; border-radius: 10px; padding: .7rem 1rem; }
 .glossary dt { font-weight: 700; color: #35d0ba; }
 .glossary dd { margin: .2rem 0 0; color: #c9d1d9; }
-.export-bar { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2.4rem; padding-top: 1.4rem; border-top: 1px solid #30363d; }
-.export-btn { background: linear-gradient(135deg, #7c83ff, #5b63f0); color: #fff; border: 0; border-radius: 10px; padding: .7rem 1.4rem; font-weight: 600; font-size: .95rem; cursor: pointer; transition: transform .15s, box-shadow .15s; }
-.export-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(124, 131, 255, .35); }
-.export-btn.alt { background: transparent; border: 1.5px solid #7c83ff; color: #c9ccff; }
-.export-btn.alt:hover { background: rgba(124, 131, 255, .12); }
+
+/* Export Bar Container */
+.export-bar { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2rem; padding: 1.2rem 1.8rem; border-top: 1px solid #30363d; border-radius: 12px 12px 0 0; background: rgba(13, 17, 23, .6); }
+
+/* Download PDF Button - Primary */
+.export-btn { flex: 1 1 180px; background: linear-gradient(135deg, #7c83ff, #35d0ba); color: #0d1117; border: 0; border-radius: 10px; padding: .7rem 1.4rem; font-weight: 600; font-size: .9rem; cursor: pointer; transition: all .2s ease; position: relative; }
+.export-btn::before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,.15), transparent); z-index: -1; opacity: 0; transition: opacity .3s ease; }
+.export-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 10px 30px rgba(124, 131, 255, .4), 0 0 20px rgba(53, 208, 186, .2); }
+.export-btn:hover::before { opacity: 1; }
+.export-btn:active { transform: translateY(1px) scale(0.97); }
+.export-btn:focus-visible { outline: 2px solid #0d1117; outline-offset: 2px; }
+
+/* Handwritten PDF Button - Secondary/Alternate */
+.export-btn.alt { flex: 1 1 180px; background: transparent; border: 1.5px solid #7c83ff; color: #7c83ff; border-radius: 10px; padding: .7rem 1.4rem; font-weight: 600; font-size: .9rem; cursor: pointer; transition: all .2s ease; position: relative; }
+.export-btn.alt::before { content: ""; position: absolute; inset: 0; background: linear-gradient(135deg, #7c83ff, #35d0ba); z-index: -1; opacity: 0; transition: opacity .3s ease; }
+.export-btn.alt:hover { color: #0d1117; box-shadow: 0 8px 20px rgba(124, 131, 255, .35); }
+.export-btn.alt:hover::before { opacity: 1; }
+.export-btn.alt:active { transform: scale(0.97); }
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .export-btn, .export-btn.alt { transition: none; transform: none; }
+  .export-btn::before, .export-btn.alt::before { display: none; }
+}

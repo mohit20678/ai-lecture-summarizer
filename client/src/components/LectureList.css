@@ -27,5 +27,12 @@
 .sidebar li:hover .del, .sidebar li.active .del { opacity: 1; }
 .sidebar .del:hover { color: #ff7b72; background: rgba(255, 123, 114, .1); }
 .sidebar .side-msg { color: #6e7681; font-size: .85rem; padding: .6rem .5rem; line-height: 1.5; }
-.sidebar .side-msg.err { color: #ff7b72; }
+.sidebar .side-loading { display: flex; align-items: center; gap: .6rem; color: #8b949e; font-size: .85rem; padding: .8rem .6rem; }
+.sidebar .spinner { width: .9rem; height: .9rem; border: 2px solid #30363d; border-top-color: #7c83ff; border-radius: 50%; animation: spin .8s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.sidebar .side-err { background: rgba(255, 123, 114, .08); border: 1px solid rgba(255, 123, 114, .35); border-radius: 10px; padding: .75rem .8rem; margin: .2rem 0; display: grid; gap: .45rem; }
+.sidebar .side-err strong { color: #ff7b72; font-size: .85rem; }
+.sidebar .side-err p { margin: 0; color: #c9d1d9; font-size: .8rem; line-height: 1.45; }
+.sidebar .side-err button { justify-self: start; background: #7c83ff; border: 0; color: #0d1117; font-weight: 700; border-radius: 7px; padding: .35rem .8rem; cursor: pointer; font-size: .8rem; transition: filter .15s, transform .15s; }
+.sidebar .side-err button:hover { filter: brightness(1.1); transform: translateY(-1px); }
 .sidebar .foot { font-size: .75rem; color: #6e7681; padding: .5rem .5rem 0; border-top: 1px solid #21262d; }

@@ -6,3 +6,22 @@
 .upload .bar { height: 4px; border-radius: 99px; background: #21262d; overflow: hidden; position: relative; }
 .upload .bar::after { content: ""; position: absolute; top: 0; bottom: 0; left: -35%; width: 35%; background: linear-gradient(90deg, #7c83ff, #35d0ba); border-radius: 99px; animation: slide 1.2s ease-in-out infinite; }
 @keyframes slide { 0% { left: -35%; } 100% { left: 100%; } }
+.upload .opts { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: .8rem 1.4rem; align-items: center; color: #8b949e; font-size: .9rem; }
+.upload .opts label { display: flex; align-items: center; gap: .45rem; }
+.upload .opts select { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 8px; padding: .35rem .6rem; }
+.upload .opts input { flex: 0 0 auto; width: auto; }
+.upload .recbar { flex-basis: 100%; display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+.upload button.rec { background: transparent; color: #e6edf3; border: 1px solid #30363d; }
+.upload button.rec.on { border-color: #ff7b72; color: #ff7b72; }
+.upload .dot { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; background: #ff7b72; margin-right: .5rem; animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: .3; } }
+.upload .hint { color: #6e7681; font-size: .82rem; }
+.upload .errbox { flex-basis: 100%; margin-top: .3rem; background: rgba(255, 123, 114, .08); border: 1px solid rgba(255, 123, 114, .4); border-radius: 12px; padding: .9rem 1rem; display: grid; gap: .35rem; animation: errin .25s ease; }
+.upload .errbox strong { color: #ff7b72; }
+.upload .errbox p { margin: 0; color: #c9d1d9; font-size: .9rem; line-height: 1.5; }
+.upload .errbox .wait { color: #f2b705; font-weight: 600; }
+.upload .err-actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .35rem; }
+.upload .errbox button { border: 0; border-radius: 8px; padding: .5rem 1rem; font-weight: 700; cursor: pointer; background: #7c83ff; color: #0d1117; }
+.upload .errbox button.ghost { background: transparent; border: 1px solid #30363d; color: #e6edf3; }
+.upload .errbox button:disabled { opacity: .55; cursor: not-allowed; }
+@keyframes errin { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }

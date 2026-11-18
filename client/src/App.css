@@ -17,6 +17,7 @@ header p { color: #8b949e; margin: 0 0 2rem; }
 .upload button:disabled { opacity: .5; cursor: not-allowed; }
 .upload small { flex-basis: 100%; color: #8b949e; }
 .error { color: #ff7b72; margin-top: 1rem; }
+.notice { color: #f2b705; background: rgba(242, 183, 5, .08); border: 1px solid rgba(242, 183, 5, .3); border-radius: 10px; padding: .7rem 1rem; margin-top: 1rem; font-size: .9rem; }
 .result { margin-top: 1.5rem; background: #161b22; border: 1px solid #30363d; border-radius: 14px; padding: 2.2rem 3rem; font-size: 1.05rem; }
 .result h2 { margin-top: 0; font-size: 1.7rem; }
 .result h3 { color: #35d0ba; margin-bottom: .3rem; }

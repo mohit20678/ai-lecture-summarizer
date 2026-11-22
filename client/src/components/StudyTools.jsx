@@ -9,7 +9,7 @@ const API = "http://localhost:5000";
 async function call(id, path, body) {
   const res = await fetch(`${API}/api/study/${id}/${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: "Bearer " + (localStorage.getItem("lecture_summarizer_token") || "") },
     body: JSON.stringify(body || {}),
   });
   const data = await res.json();

@@ -72,7 +72,7 @@ router.post(
       }
 
       const note = await Note.findById(noteId);
-      if (!note || note.user.toString() !== userId) {
+      if (!note || String(note.user) !== String(userId)) {
         return res.status(404).json({ error: "Lecture not found" });
       }
 
@@ -124,7 +124,7 @@ router.post(
       }
 
       const note = await Note.findById(noteId);
-      if (!note || note.user.toString() !== userId) {
+      if (!note || String(note.user) !== String(userId)) {
         return res.status(404).json({ error: "Lecture not found" });
       }
 
@@ -185,7 +185,7 @@ router.post(
       }
 
       const note = await Note.findById(noteId);
-      if (!note || note.user.toString() !== userId) {
+      if (!note || String(note.user) !== String(userId)) {
         return res.status(404).json({ error: "Lecture not found" });
       }
 

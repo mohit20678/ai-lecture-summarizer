@@ -12,6 +12,7 @@ const API = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(/\
 export default function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [loadingAuth, setLoadingAuth] = useState(true);
   const [status, setStatus] = useState("idle"); // idle | loading | done | error
   const [result, setResult] = useState(null);
   const [lectures, setLectures] = useState([]);
@@ -40,14 +41,15 @@ export default function App() {
     try {
       const res = await fetch(`${API}/api/verify-token`, {
         method: "GET",
-        credentials: "same-origin",
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "omit",
       });
       const data = await res.json();
       if (data.valid && data.user) {
         setUser(data.user);
         setToken(token);
         // Load lectures for this user
-        await loadUserLectures();
+        await loadUserLectures(token);
         // Show main app, hide login
         const loginRoot = document.getElementById("login-root");
         const appRoot = document.getElementById("app-root");
@@ -74,11 +76,11 @@ export default function App() {
   };
 
   // Load lectures for the authenticated user
-  const loadUserLectures = async () => {
+  const loadUserLectures = async (tokenOverride) => {
     setListLoading(true);
     try {
       const res = await fetch(`${API}/api/notes`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${tokenOverride || token}` },
         credentials: "omit",
       });
       const data = await res.json().catch(() => ({}));
@@ -98,7 +100,7 @@ export default function App() {
     localStorage.setItem("lecture_summarizer_token", token);
     setUser(userData);
     setLoadingAuth(false);
-    await loadUserLectures();
+    await loadUserLectures(token);
     // Hide login form, show app
     const loginRoot = document.getElementById("login-root");
     const appRoot = document.getElementById("app-root");
@@ -161,7 +163,7 @@ export default function App() {
         setResult(data);
         setStatus("done");
         setNotice(data.saveWarning || "");
-        await loadUserLectures(); // Refresh lecture list
+        await loadUserLectures(token); // Refresh lecture list
       }
     } catch (err) {
       console.error("Upload error:", err);
@@ -203,7 +205,7 @@ export default function App() {
         setResult(null);
         setStatus("idle");
       }
-      await loadUserLectures();
+      await loadUserLectures(token);
     } catch (err) {
       setListError(err.message || "Could not delete lecture");
     }

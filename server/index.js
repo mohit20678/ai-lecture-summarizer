@@ -54,8 +54,8 @@ app.get("/api/verify-token", async (req, res) => {
       return res.status(401).json({ error: "No token provided" });
     }
 
-    const jwt = require("jsonweblibrary");
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "change-this");
+    const jwt = require("jsonwebtoken");
+    const decoded = jwt.verify(token, require("./config/jwt").JWT_SECRET);
 
     const User = require("./models/User");
     const user = await User.findById(decoded.userId).select(

@@ -23,7 +23,7 @@ const authenticateToken = async (req, res, next) => {
     const token = authHeader.replace("Bearer ", "");
 
     // Verify the token
-    const secret = process.env.JWT_SECRET || "change-this-to-a-secure-random-string";
+    const secret = require("../config/jwt").JWT_SECRET;
     const decoded = jwt.verify(token, secret);
 
     // Fetch user from database, excluding sensitive fields
@@ -70,7 +70,7 @@ const optionalAuth = async (req, res, next) => {
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.replace("Bearer ", "");
       const jwt = require("jsonwebtoken");
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || "change-this");
+      const decoded = jwt.verify(token, require("../config/jwt").JWT_SECRET);
       
       const User = require("../models/User");
       const user = await User.findById(decoded.userId).select(

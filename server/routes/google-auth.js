@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const passport = require("passport");
 
 // Configure JWT
-const JWT_SECRET = process.env.JWT_SECRET || "change-this-to-a-secure-random-string";
+const { JWT_SECRET } = require("../config/jwt");
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
 // Google OAuth20 setup - only if credentials are provided
@@ -21,7 +22,7 @@ try {
         {
           clientID: process.env.GOOGLE_CLIENT_ID,
           clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:5000/auth/google/callback",
+          callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:5000/api/google/google/callback",
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
@@ -63,7 +64,7 @@ if (passportGoogleInitialized) {
   router.get(
     "/google",
     passport.authenticate("google", {
-      scope: ["profile", "email", "drive.file", "drive.metadata.readonly"],
+      scope: ["profile", "email"],
       session: false,
     })
   );
@@ -73,7 +74,7 @@ if (passportGoogleInitialized) {
 if (passportGoogleInitialized) {
   router.get(
     "/google/callback",
-    passport.authenticate("google", { session: false, failureRedirect: "/login" }),
+    passport.authenticate("google", { session: false, failureRedirect: process.env.FRONTEND_URL || "http://localhost:5173" }),
     async (req, res) => {
       try {
         // Generate JWT for the user

@@ -3,9 +3,10 @@ const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { authenticateToken } = require("../middleware/auth");
 
 // Configure JWT
-const JWT_SECRET = process.env.JWT_SECRET || "change-this-to-a-secure-random-string";
+const { JWT_SECRET } = require("../config/jwt");
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
 // Register a new user
@@ -17,6 +18,10 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({
         error: "Please provide both email and password",
       });
+    }
+
+    if (String(password).length < 8) {
+      return res.status(400).json({ error: "Password must be at least 8 characters" });
     }
 
     // Check if user already exists
@@ -129,10 +134,10 @@ router.get("/logout", (req, res) => {
 });
 
 // Get current user (protected route - needs auth middleware)
-router.get("/me", async (req, res) => {
+router.get("/me", authenticateToken, async (req, res) => {
   try {
     // The user should be available from auth middleware
-    const user = await User.findById(req.user.userId).select(
+    const user = await User.findById(req.user._id).select(
       "-password -driveRefreshToken"
     );
     res.json({

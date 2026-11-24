@@ -73,7 +73,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 
 // Static method to find user by email (for login)
 userSchema.statics.findByEmail = function (email) {
-  return this.findOne({ email: email.toLowerCase() });
+  return this.findOne({ email: email.toLowerCase() }).select("+password");
 };
 
 module.exports = mongoose.model("User", userSchema);

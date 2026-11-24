@@ -1,8 +1,6 @@
 const path = require("path");
 
 // Always load server/.env, no matter which folder the server was started from.
-// Starting from the repo root used to skip this file, which left MONGO_URI and
-// OPENAI_API_KEY empty and made the lecture history disappear.
 require("dotenv").config({ path: path.join(__dirname, ".env"), quiet: true });
 
 const express = require("express");
@@ -11,7 +9,7 @@ const mongoose = require("mongoose");
 
 // Configure Passport for authentication
 const passport = require("passport");
-require("./config/passportConfig"); // We'll create this next
+require("./config/passportConfig");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,7 +18,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json({ limit: "1mb" }));
 
-// Initialize Passport (session-based auth is not used; we use JWT)
+// Initialize Passport
 app.use(passport.initialize());
 
 // Health check endpoint
@@ -45,7 +43,7 @@ app.use("/api/study", require("./routes/study"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/google", require("./routes/google-auth"));
 
-// Token verification (for frontend checks)
+// Token verification
 app.get("/api/verify-token", async (req, res) => {
   try {
     const token = req.headers.authorization?.replace("Bearer ", "");
@@ -77,9 +75,6 @@ app.get("/api/verify-token", async (req, res) => {
   }
 });
 
-// Serve API health details
-app.use("/api/health", require("./routes/health"));
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   if (err && err.code === "LIMIT_FILE_SIZE") {
@@ -88,36 +83,56 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || "Internal server error" });
 });
 
-// Database connection with improved error handling
+// Database connection with automatic retry (handles IP whitelist expiration)
 const uri = process.env.MONGO_URI;
 
-if (!uri || uri.includes("your_mongodb_link_here")) {
-  console.warn(
-    "[db] WARNING: MONGO_URI is missing in server/.env — lecture history will not load or save. " +
-    "Set MONGO_URI in server/.env to use the full database features."
-  );
-} else {
+let dbConnected = false;
+
+function connectMongo() {
+  if (!uri || uri.includes("your_mongodb_link_here")) {
+    console.warn(
+      "[db] WARNING: MONGO_URI is missing in server/.env — lecture history will not load or save. " +
+      "Set MONGO_URI in server/.env to use the full database features."
+    );
+    return;
+  }
+
   mongoose
     .connect(uri, {
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
+      connectTimeoutMS: 10000,
+      maxPoolSize: 10,
     })
-    .then(() => console.log("[db] MongoDB connected — lecture history is available"))
-    .catch((err) => console.error("[db] MongoDB connection failed:", err.message));
-
-  // Connection event listeners
-  mongoose.connection.on("disconnected", () => {
-    console.warn("[db] MongoDB disconnected — history features will be unavailable");
-  });
-
-  mongoose.connection.on("reconnected", () => {
-    console.log("[db] MongoDB reconnected — history features restored");
-  });
-
-  mongoose.connection.on("error", (err) => {
-    console.error("[db] MongoDB error:", err.message);
-  });
+    .then(() => {
+      console.log("[db] MongoDB connected — lecture history is available");
+      dbConnected = true;
+    })
+    .catch((err) => {
+      console.error("[db] MongoDB connection failed:", err.message);
+      // Retry after 10 seconds if connection fails (e.g., IP whitelist expired)
+      setTimeout(connectMongo, 10000);
+    });
 }
+
+// Connection event listeners
+mongoose.connection.on("disconnected", () => {
+  console.warn("[db] MongoDB disconnected — attempting reconnect...");
+  dbConnected = false;
+  setTimeout(connectMongo, 5000);
+});
+
+mongoose.connection.on("reconnected", () => {
+  console.log("[db] MongoDB reconnected — history features restored");
+  dbConnected = true;
+});
+
+mongoose.connection.on("error", (err) => {
+  console.error("[db] MongoDB error:", err.message);
+});
+
+// Initial connection attempt
+connectMongo();
 
 // Start server
 const server = app.listen(PORT, () => {
@@ -142,14 +157,10 @@ server.on("error", (err) => {
   throw err;
 });
 
-// Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
   console.error("Unhandled rejection:", err);
-  // Graceful shutdown - do not crash in production
-  // process.exit(1);
 });
 
-// Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
   console.error("Uncaught exception:", err);
   process.exit(1);

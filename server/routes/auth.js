@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const { authenticateToken } = require("../middleware/auth");
 
 // Configure JWT
-const { JWT_SECRET } = require("../config/jwt");
+const JWT_SECRET = process.env.JWT_SECRET || "lecture-summarizer-jwt-secret-key-2026-secure-change-in-production";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 
 // Register a new user
@@ -120,7 +120,7 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({
-      error: "Failed to log in. Please try again.",
+      error: "Login failed: " + (error.message || "Unknown error"),
     });
   }
 });

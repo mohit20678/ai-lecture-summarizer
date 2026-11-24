@@ -3,6 +3,7 @@ import Login from "./components/Login";
 import ResultCard from "./components/ResultCard";
 import LectureList from "./components/LectureList";
 import StudyTools from "./components/StudyTools";
+import UploadBox from "./components/UploadBox";
 import "./App.css";
 import "./print.css";
 
@@ -212,7 +213,22 @@ export default function App() {
   };
 
   // New lecture handler
-  const newLecture = () => {
+  const startDrag = (e) => {
+      e.preventDefault();
+      setDragging(true);
+      document.body.style.userSelect = "none";
+      const move = (ev) => setWidth(Math.min(520, Math.max(220, ev.clientX)));
+      const up = () => {
+        setDragging(false);
+        document.body.style.userSelect = "";
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", up);
+      };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    };
+  
+    const newLecture = () => {
     setResult(null);
     setErrorInfo({ message: "", code: "", retryAfter: 0 });
     setNotice("");

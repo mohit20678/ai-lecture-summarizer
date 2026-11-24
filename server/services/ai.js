@@ -1,5 +1,6 @@
 const fs = require("fs");
 const { OpenAI } = require("openai");
+const { retryWithBackoff } = require("./aiError");
 
 const SCHEMA = `{"title":"short title","summary":"overview in 3 to 4 sentences","topics":[{"heading":"topic name","explanation":"clear, detailed explanation in 2 to 4 short paragraphs separated by \\n\\n","keyPoints":["3 to 6 short points"],"example":"one example from the text, or an empty string","visual":{"type":"none"}}],"glossary":[{"term":"term","meaning":"short meaning"}],"formulas":[{"name":"short name","expression":"the formula exactly as written in the text","meaning":"what it means, with each symbol explained"}],"importantTopics":[{"topic":"topic name","why":"why it seems important, for example repeated or stressed in the text"}],"keyPoints":["5 to 8 overall key points"],"revisionQuestions":["4 to 6 self-test questions"]}`;
 
@@ -43,7 +44,6 @@ function getClient() {
   if (!key || key === "your_key_here") {
     throw new Error("OPENAI_API_KEY is missing in server/.env");
   }
-  // Do not let a stuck request spin the UI timer forever.
   return new OpenAI({ apiKey: key, maxRetries: 0, timeout: 180000 });
 }
 
@@ -110,20 +110,26 @@ function parseNotes(raw) {
 async function summarizeText(text, opts) {
   const client = getClient();
   const instructions = buildPrompt(opts);
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    const response = await client.responses.create({
-      model: process.env.SUMMARY_MODEL || "gpt-6-luna",
-      instructions,
-      input: text.slice(0, 30000),
-    });
-    const notes = parseNotes(response.output_text);
-    if (notes && notes.title) {
-      for (const k of ["topics", "glossary", "formulas", "importantTopics", "keyPoints", "revisionQuestions"]) {
-        if (!Array.isArray(notes[k])) notes[k] = [];
-      }
-      return notes;
+
+  // Auto-retry on rate limits (up to 3 attempts with backoff)
+  const response = await retryWithBackoff(
+    async () => {
+      return await client.responses.create({
+        model: process.env.SUMMARY_MODEL || "gpt-6-luna",
+        instructions,
+        input: text.slice(0, 30000),
+      });
+    },
+    3,
+    2000
+  );
+
+  const notes = parseNotes(response.output_text);
+  if (notes && notes.title) {
+    for (const k of ["topics", "glossary", "formulas", "importantTopics", "keyPoints", "revisionQuestions"]) {
+      if (!Array.isArray(notes[k])) notes[k] = [];
     }
-    console.error("Attempt " + attempt + ": the AI answer was not valid JSON");
+    return notes;
   }
   throw new Error("The AI returned an unreadable answer. Please try again.");
 }

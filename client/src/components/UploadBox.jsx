@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./UploadBox.css";
 
-const OK = [".pdf", ".mp3", ".wav", ".m4a", ".webm", ".mp4"];
+const OK = [".pdf", ".mp3", ".wav", ".m4a", ".webm", ".mp4", ".jpg", ".jpeg", ".png", ".webp"];
 const MAX = 25 * 1024 * 1024;
 const LANGS = ["Same as lecture", "English", "Hindi", "Marathi", "Spanish", "French", "German"];
 
@@ -90,7 +90,7 @@ export default function UploadBox({ onUpload, loading, error, errorInfo, onClear
     const ext = f.name.slice(f.name.lastIndexOf(".")).toLowerCase();
     if (!OK.includes(ext)) {
       setFile(null);
-      setMsg("Unsupported file. Please use PDF, MP3, WAV, M4A, WEBM or MP4.");
+      setMsg("Unsupported file. Please use PDF, MP3, WAV, M4A, WEBM, MP4, or images (.jpg, .png, .webp).");
       return;
     }
     if (f.size > MAX) {
@@ -162,13 +162,13 @@ export default function UploadBox({ onUpload, loading, error, errorInfo, onClear
         ref={input}
         type="file"
         hidden
-        accept=".pdf,.mp3,.wav,.m4a,.webm,.mp4"
+        accept=".pdf,.mp3,.wav,.m4a,.webm,.mp4,.jpg,.jpeg,.png,.webp"
         onChange={(e) => pick(e.target.files[0])}
       />
       <div className="drop" onClick={() => !loading && !rec && input.current.click()}>
         <strong>{file ? file.name : "Drop a PDF, audio or video file here, or click to choose"}</strong>
         <small>
-          {file ? `${(file.size / 1048576).toFixed(1)} MB` : "PDF, MP3, WAV, M4A, WEBM or MP4, up to 25 MB"}
+          {file ? `${(file.size / 1048576).toFixed(1)} MB` : "PDF, MP3, WAV, M4A, WEBM or MP4, up to 25 MB. Images (.jpg, .png, .webp) also supported."}
         </small>
       </div>
       <button disabled={blocked} onClick={submit}>

@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const mongoose = require("mongoose");
 const { PDFParse } = require("pdf-parse");
+const { OpenAI } = require("openai");
 const { transcribeAudio, summarizeText } = require("../services/ai");
 const { describeAiError } = require("../services/aiError");
 const Note = require("../models/Note");
@@ -19,7 +20,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const allowed = [".mp3", ".wav", ".m4a", ".webm", ".mp4", ".pdf"];
+const allowed = [".mp3", ".wav", ".m4a", ".webm", ".mp4", ".pdf", ".jpg", ".jpeg", ".png", ".webp"];
 
 const upload = multer({
   storage,
@@ -27,10 +28,38 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
     if (allowed.includes(ext)) cb(null, true);
-    else cb(new Error("Only pdf, mp3, wav, m4a, webm and mp4 files are allowed"));
+    else cb(new Error("Only pdf, mp3, wav, m4a, webm, mp4, jpg, jpeg, png and webp files are allowed"));
   },
 });
 
+/** Extract text from an image file using OpenAI's vision (responses API) */
+async function extractImageText(filePath) {
+  const client = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+    maxRetries: 0,
+    timeout: 180000,
+  });
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeType = ext === ".jpg" ? "jpeg" : ext;
+  const base64 = fs.readFileSync(filePath, { encoding: "base64" });
+  const response = await client.responses.create({
+    model: process.env.SUMMARY_MODEL || "gpt-6-luna",
+    input: [
+      {
+        role: "user",
+        content: [
+          { type: "input_text", text: "Extract all text from this image. Return only the text content, do not invent or summarize. If there are formulas, write them out exactly." },
+          { type: "input_image", image_url: `data:image/${mimeType};base64,${base64}` },
+        ],
+      },
+    ],
+    instructions:
+      "You are a study assistant. Extract all readable text from the image. Return the text as a single block. Do not summarize, do not add analysis. If you see formulas or equations, write them out exactly as they appear.",
+  });
+  return response.output_text || "";
+}
+
+/** Extract text from a PDF file */
 async function extractPdfText(filePath) {
   const bytes = new Uint8Array(fs.readFileSync(filePath));
   const parser = new PDFParse({ data: bytes });
@@ -83,6 +112,17 @@ router.post(
             error: "This PDF has no readable text. It may be a scan of paper — try a text-based PDF.",
           });
         }
+      } else if (ext === ".jpg" || ext === ".jpeg" || ext === ".png" || ext === ".webp") {
+        try {
+          text = await extractImageText(req.file.path);
+          pages = 1;
+          if (!text || text.trim().length < 10) {
+            return res.status(422).json({ error: "No readable text was found in this image." });
+          }
+        } catch (err) {
+          console.error("Image text extraction error:", err.message);
+          return res.status(422).json({ error: "This image could not be read. It may be blurred, very small, or not a real image." });
+        }
       } else {
         text = await transcribeAudio(req.file.path);
         if (!text || text.trim().length < 20) {
@@ -93,7 +133,7 @@ router.post(
       const notes = await summarizeText(text, opts);
 
       const result = {
-        type: ext === ".pdf" ? "pdf" : "audio",
+        type: ext === ".pdf" ? "pdf" : ext.match(/\.(jpg|jpeg|png|webp)$/) ? "image" : "audio",
         filename: req.file.originalname,
         originalName: req.file.originalname,
         userId: user._id,

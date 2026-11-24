@@ -36,9 +36,9 @@ function describeAiError(err) {
         code: "quota",
         retryAfter,
         message:
-          "Your OpenAI quota is used up, so the summary could not be created." +
-          (retryAfter ? " The limit should reset in about " + humanWait(retryAfter) + "." : "") +
-          " Your file is still selected — press Try again later or add credit to your OpenAI account.",
+          "Your OpenAI quota is used up." +
+          (retryAfter ? " Try again in " + humanWait(retryAfter) + "." : " Please wait and try again.") +
+          " Your file is still selected — press 'Try again' when ready.",
       };
     }
     return {
@@ -47,7 +47,7 @@ function describeAiError(err) {
       retryAfter,
       message:
         "OpenAI is limiting requests right now." +
-        (retryAfter ? " Please try again in " + humanWait(retryAfter) + "." : " Please wait a minute and try again."),
+        (retryAfter ? " Try again in " + humanWait(retryAfter) + "." : " Please wait a minute and try again."),
     };
   }
 
@@ -97,4 +97,23 @@ function humanWait(seconds) {
   return h + " hour" + (h === 1 ? "" : "s") + (rest ? " and " + rest + " minutes" : "");
 }
 
-module.exports = { describeAiError, parseRetrySeconds, humanWait };
+// Auto-retry wrapper: retries the function up to maxRetries times with delay
+// when OpenAI returns a 429 rate-limit error.
+async function retryWithBackoff(fn, maxRetries = 3, baseDelay = 2000) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const friendly = describeAiError(err);
+      if (friendly && friendly.code === "rate" && attempt < maxRetries) {
+        const waitMs = friendly.retryAfter ? friendly.retryAfter * 1000 : baseDelay * attempt;
+        console.log(`Rate limited. Retrying in ${Math.round(waitMs / 1000)}s (attempt ${attempt}/${maxRetries})...`);
+        await new Promise((resolve) => setTimeout(resolve, waitMs));
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
+module.exports = { describeAiError, parseRetrySeconds, humanWait, retryWithBackoff };
